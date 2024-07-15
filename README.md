@@ -1,4 +1,4 @@
-# 3dAssetEncryption
+# 3d asset encryption by obfuscation
 
 Simple project encrypting 3d assets. Using GLTF as 3d model format. The encrypted object can still be rendered.
 
