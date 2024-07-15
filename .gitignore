@@ -361,3 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+ConsoleApplication1/models/Duck/glTF/_EncryptedDuck.gltf
+ConsoleApplication1/models/Duck/glTF/_DecryptedDuck.gltf
