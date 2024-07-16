@@ -164,6 +164,89 @@ void reverseShuffleVertices(tinygltf::Model& model, unsigned int seed) {
     }
 }
 
+void shuffleVertexComponents(tinygltf::Model& model, unsigned int seed) {
+    std::mt19937 generator(seed);
+
+    for (auto& mesh : model.meshes) {
+        for (auto& primitive : mesh.primitives) {
+            if (primitive.attributes.find("POSITION") != primitive.attributes.end()) {
+                tinygltf::Accessor& accessor =
+                    model.accessors[primitive.attributes["POSITION"]];
+                tinygltf::BufferView& bufferView =
+                    model.bufferViews[accessor.bufferView];
+                tinygltf::Buffer& buffer = model.buffers[bufferView.buffer];
+
+                float* positions = reinterpret_cast<float*>(
+                    &buffer.data[bufferView.byteOffset + accessor.byteOffset]);
+
+                size_t vertexComponentCount = accessor.count * accessor.type;
+
+                // Storage for permutation of vertex index
+                std::vector<size_t> permutation(vertexComponentCount);
+
+                // Fill with 0, 1, 2, ..., vertexCount-1. As correct index.
+                // permutation.at(1) = 1 etc
+                std::iota(permutation.begin(), permutation.end(), 0);
+
+                std::vector<float> tempPositions(vertexComponentCount);
+
+                // Suffle vertex index based on random generator.
+                // permutation.at(1) = 224 etc
+                std::ranges::shuffle(permutation.begin(), permutation.end(), generator);
+
+                // For each vertex component (x, y, z)
+                for (size_t i = 0; i < vertexComponentCount; ++i) {
+                    // Swap vertex component 
+                    tempPositions[i] = positions[permutation[i]];
+                }
+
+                std::move(tempPositions.begin(), tempPositions.end(), positions);
+            }
+        }
+    }
+}
+
+// Reverse the vertex shuffling 
+void reverseShuffleVertexComponents(tinygltf::Model& model, unsigned int seed) {
+    std::mt19937 generator(seed);
+    for (auto& mesh : model.meshes) {
+        for (auto& primitive : mesh.primitives) {
+            if (primitive.attributes.find("POSITION") != primitive.attributes.end()) {
+                tinygltf::Accessor& accessor =
+                    model.accessors[primitive.attributes["POSITION"]];
+                tinygltf::BufferView& bufferView =
+                    model.bufferViews[accessor.bufferView];
+                tinygltf::Buffer& buffer = model.buffers[bufferView.buffer];
+
+                float* positions = reinterpret_cast<float*>(
+                    &buffer.data[bufferView.byteOffset + accessor.byteOffset]);
+
+                size_t vertexComponentCount = accessor.count * accessor.type;
+
+                // Storage for permutation of vertex index
+                std::vector<size_t> permutation(vertexComponentCount);
+
+                // Fill with 0, 1, 2, ..., 
+                // permutation.at(1) = 1 etc
+                std::iota(permutation.begin(), permutation.end(), 0);
+
+                // Suffle vertex index based on random generator.
+                // permutation.at(1) = 224 etc
+                std::ranges::shuffle(permutation.begin(), permutation.end(), generator);
+
+                std::vector<float> tempPositions(vertexComponentCount);
+                // Reverse shuffle. Copy index in vertex index (position) back to
+                // correct vertex index.
+                for (size_t i = 0; i < vertexComponentCount; ++i) {
+                    tempPositions[permutation[i]] = positions[i];
+                }
+
+                std::move(tempPositions.begin(), tempPositions.end(), positions);
+            }
+        }
+    }
+}
+
 int main(int argc, char** argv) {
     // 1. take 3 argument
     //     a. input
@@ -231,9 +314,14 @@ int main(int argc, char** argv) {
     printVertices(model, 5);
 
     int key = 1337;
-    // ENCRYPT
+
+    // 3 encryption method.
+    // uncomment one only. 
+    // remember to select correct decryption method
+
     //obfuscateVertices(model, key);
     shuffleVertices(model, key);
+    //shuffleVertexComponents(model, key);
 
     //print encrypted
     std::cout << "Encrypted" << std::endl;
@@ -250,9 +338,13 @@ int main(int argc, char** argv) {
     std::cout << "Successfully encrypt and saved glTF file: "
         << encrypted_filename << std::endl;
 
-    // DECRYPT
+    // 3 decryption method.
+    // uncomment one only. 
+    // select correct decryption method based on encryption method used
+
     //obfuscateVertices(model, key);
     reverseShuffleVertices(model, key);
+    //reverseShuffleVertexComponents(model, key);
 
     //print decrypted
     std::cout << "Decrypted" << std::endl;
