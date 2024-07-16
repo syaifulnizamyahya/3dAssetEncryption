@@ -257,7 +257,10 @@ int main(int argc, char** argv) {
     // 4. decrypt and save
 
     if (argc < 3) {
-        printf("Needs input.gltf\n");
+        printf("Usage : \n");
+        printf("App.exe reference.gltf encrypted.gltf decrypted.gltf\n");
+        printf("Example usage:\n");
+        printf("ConsoleApplication1.exe models\\Duck\\glTF\\Duck.gltf models\\Duck\\glTF\\_EncryptedDuck.gltf models\\Duck\\glTF\\_DecryptedDuck.gltf\n");
         exit(1);
     }
 
